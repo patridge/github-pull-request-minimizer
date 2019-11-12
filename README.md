@@ -11,7 +11,7 @@ A proof-of-concept was developed that works when executed in the browser develop
 1. Create a bookmark for any page, even this one.
 1. Find the new bookmark and edit it. If you just bookmarked this page in Chrome, click the **More...** button to edit the bookmark address.
 
-    ![Screenshot of the initial bookmark addition pop-up in Windows Chrome](media\new-bookmark-windows-chrome.png)
+    ![Screenshot of the initial bookmark addition pop-up in Windows Chrome](.\media\new-bookmark-windows-chrome.png)
 
 1. Inside the bookmark edit pop-up, set the address to this large block of JavaScript. (It's ugly, but that's how bookmarklets often look.)
 
@@ -24,7 +24,7 @@ return foundBotNamePrefix})(),itemDate:(()=>{return Date.parse(timelineItem.getE
 
 1. Name your bookmark something like `Minimize old bot comments`, so you can find it easily in your bookmarks.
 
-    ![Screenshot of the bookmark edit pop-up after setting the fields to match these directions.](media\edit-bookmark-windows-chrome.png)
+    ![Screenshot of the bookmark edit pop-up after setting the fields to match these directions.](.\media\edit-bookmark-windows-chrome.png)
 
 1. Now, when you are viewing a GitHub pull request with lots of old bot comments, just click that bookmark you created. It will go through the page and submit the requests to mark all prior bot comments as hidden, with the reason "Outdated".
 
