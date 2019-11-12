@@ -1,4 +1,4 @@
-# GitHub pull request minimizer
+# GitHub pull request comment minimizer
 
 Minimize GitHub comment noise in your pull requests from bots using this Google Chrome extension.
 
