@@ -1,0 +1,46 @@
+{
+  "name": "Microsoft Docs/Learn GitHub comment minimizer",
+  "short_name": "GHMinimizer",
+  "description": "If you have several bots fighting for attention in your GitHub pull request history on a MicrosoftDocs repo, this will allow you to hide all old comments as outdated.",
+  "version": "0.0.1",
+  "permissions": [
+    "activeTab",
+    "declarativeContent"
+  ],
+  "background": {
+    "scripts": ["comment-minimizer.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+        "matches": [
+            "https://docs.microsoft.com/en-us/learn/*"
+        ],
+        "js": ["get-author.js"],
+        "run_at": "document_idle"
+    },
+    {
+      "matches": [
+          "https://github.com/*"
+      ],
+      "js": ["comment-minimizer.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "page_action": {
+    "default_popup": "extension-popup.html",
+    "default_icon": {
+      "16": "images/get_started16.png",
+      "32": "images/get_started32.png",
+      "48": "images/get_started48.png",
+      "128": "images/get_started128.png"
+    }
+  },
+  "icons": {
+    "16": "images/get_started16.png",
+    "32": "images/get_started32.png",
+    "48": "images/get_started48.png",
+    "128": "images/get_started128.png"
+  },
+  "manifest_version": 2
+}
