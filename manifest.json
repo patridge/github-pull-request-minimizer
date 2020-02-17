@@ -2,7 +2,7 @@
   "name": "Microsoft Docs/Learn GitHub comment minimizer",
   "short_name": "GHMinimizer",
   "description": "If several bots fight for attention in your GitHub pull requests, this will allow you to hide all old comments as outdated.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "permissions": [
     "activeTab",
     "declarativeContent"
