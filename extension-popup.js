@@ -10,7 +10,7 @@ hideOutdatedCommentsButton.onclick = function(element) {
             chrome.tabs.executeScript(
                 tabs[0].id,
                 {
-                    code: 'console.log("Hiding old bot comments..."); commentMinimizer.hideOutdatedBotComments();'
+                    file: "comment-minimizer.js"
                 }
             );
         }

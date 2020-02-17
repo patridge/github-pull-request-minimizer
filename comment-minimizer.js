@@ -1,26 +1,12 @@
-// chrome.runtime.onInstalled.addListener(function() {
-//     chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-//         chrome.declarativeContent.onPageChanged.addRules([
-//             {
-//                 conditions: [
-//                     new chrome.declarativeContent.PageStateMatcher({
-//                         pageUrl: {hostEquals: "github.com"},
-//                     })
-//                 ],
-//                 actions: [new chrome.declarativeContent.ShowPageAction()]
-//             }
-//         ]);
-//     });
-// });
-
-var commentMinimizer = (function() {
+(function() {
+    // Any comments by a username that starts with any of the following strings will be eligible for hiding of old comments. These are the defaults, ones used in MicrosoftDocs repos.
     const botNamePrefixes = [
         "opbld",
         "PRMerger",
         "acrolinxatmsft"
     ];
 
-    var hideOutdatedBotComments = function () {
+    let hideOutdatedBotComments = function () {
         if (!Array.prototype.groupBy) {
             Array.prototype.groupBy = function (keyDefiner) {
                 return this.reduce(function(store, item) {
@@ -82,18 +68,7 @@ var commentMinimizer = (function() {
                 });
             }
         }
-    }
+    };
 
-    return {
-        hideOutdatedBotComments
-    }
+    hideOutdatedBotComments();
 })();
-
-// var contexts = ["page", "selection", "link"];
-// for (var context in contexts) {
-//     chrome.contextMenus.create({
-//         "title": "Minimize old bot comments",
-//         "context": [context],
-//         "onclick": minimizeBotComments
-//     });
-// }
