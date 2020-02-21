@@ -8,6 +8,10 @@ Once installed, from any GitHub pull request (currently limited to MicrosoftDocs
 
 If you ever hide a comment you need shown, you can always click "Show comment" to restore its visibility.
 
+## Installation
+
+If you are using Google Chrome or the Chromium-based Microsoft Edge, you can install the [GitHub comment minimizer extension](https://chrome.google.com/webstore/detail/microsoft-docslearn-githu/kcjgaccpjfoapcbaaecnjngjeccgmplh) to allow hiding old bot comments in your GitHub pull requests.
+
 ## Current bot name prefixes
 
 Until this extension allows you to customize the bot name prefixes, it is set to minimize bots with the following prefixes:
