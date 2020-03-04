@@ -183,4 +183,4 @@ let displaySavedNamePrefixes = async function () {
 
 addNewPrefixButton.addEventListener("click", addNewPrefixButtonClick);
 document.addEventListener('DOMContentLoaded', displaySavedNamePrefixes);
-document.addEventListener('DOMContentLoaded', functionsetMicrosoftDocsAndLearnDefaultPrefixes);
+document.addEventListener('DOMContentLoaded', setMicrosoftDocsAndLearnDefaultPrefixes);
