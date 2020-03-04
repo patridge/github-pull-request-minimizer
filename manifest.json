@@ -3,9 +3,11 @@
   "short_name": "GHMinimizer",
   "description": "If several bots fight for attention in your GitHub pull requests, this will allow you to hide all old comments as outdated.",
   "version": "0.3.0",
+  "options_page": "options.html",
   "permissions": [
     "activeTab",
-    "declarativeContent"
+    "declarativeContent",
+    "storage"
   ],
   "background": {
     "scripts": [
