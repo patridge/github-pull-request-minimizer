@@ -6,18 +6,39 @@
         "acrolinxatmsft"
     ];
 
-    let hideOutdatedBotComments = function () {
-        if (!Array.prototype.groupBy) {
-            Array.prototype.groupBy = function (keyDefiner) {
-                return this.reduce(function(store, item) {
-                    let key = keyDefiner(item);
-                    let value = store[key] || [];
-                    store[key] = value.concat([item]);
-                    return store;
-                }, {})
-            };
-        }
+    if (!Array.prototype.groupBy) {
+        Array.prototype.groupBy = function (keyDefiner) {
+            return this.reduce(function(store, item) {
+                let key = keyDefiner(item);
+                let value = store[key] || [];
+                store[key] = value.concat([item]);
+                return store;
+            }, {})
+        };
+    }
 
+    let expandCommentHistory = function () {
+        let expandPaging = function () {
+            // Look for pagination buttons to click
+            let paginationSubmitButtons = [...document.querySelectorAll(".ajax-pagination-btn")];
+            let foundPaging = paginationSubmitButtons.some(_ => true);
+            if (foundPaging) {
+                // Found pagination buttons, click one and wait before firing off this function again.
+                console.log("Loading additional comments to check...");
+                paginationSubmitButtons.forEach(btn => btn.click());
+                setTimeout(expandPaging, 3000);
+                hideOutdatedBotComments();
+            }
+            else {
+                // No more pagination buttons found, proceed with hiding comments.
+                console.log("Done loading additional comments.");
+            }
+        };
+        expandPaging();
+    }
+
+    let hideOutdatedBotComments = function () {
+        console.log("Hiding any available comments...");
         let groupedItemsToProcess = [...document.querySelectorAll(".js-comment-hide-button")] // find all the hide buttons (auto-excludes initial PR "comment" that is also a .TimelineItem element)
             .map((button) => { // Get the nearest timeline item
                 let timelineItem = button.closest(".js-timeline-item");
@@ -71,4 +92,5 @@
     };
 
     hideOutdatedBotComments();
+    expandCommentHistory();
 })();
