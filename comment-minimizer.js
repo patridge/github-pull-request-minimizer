@@ -1,11 +1,4 @@
-(function() {
-    // Any comments by a username that starts with any of the following strings will be eligible for hiding of old comments. These are the defaults, ones used in MicrosoftDocs repos.
-    const botNamePrefixes = [
-        "opbld",
-        "PRMerger",
-        "acrolinxatmsft"
-    ];
-
+(async function () {
     if (!Array.prototype.groupBy) {
         Array.prototype.groupBy = function (keyDefiner) {
             return this.reduce(function(store, item) {
@@ -16,6 +9,39 @@
             }, {})
         };
     }
+    let storageSyncGetAsync = function (keysAndDefaults) {
+        let gotValue = new Promise((resolve, reject) => {
+            chrome.storage.sync.get(
+                keysAndDefaults, // NOTE: `null` will get entire contents of storage
+                function (result) {
+                    // Keys could be a string or an array of strings (or any object to get back an empty result, or null to get all of cache).
+                    // Unify to an array regardless.
+                    let keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
+                    for (var keyIndex in keyList) {
+                        var key = keyList[keyIndex];
+                        if (result[key]) {
+                            console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
+                        }
+                        else {
+                            console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
+                        }
+                    }
+                    resolve(result);
+                }
+            );
+        });
+        return gotValue;
+    };
+    let getPrefixes = async function () {
+        let currentSavedPrefixes = await storageSyncGetAsync(
+            {
+                namePrefixes: []
+            }
+        );
+        console.log(currentSavedPrefixes);
+        return currentSavedPrefixes.namePrefixes;
+    };
+    let botNamePrefixes = (await getPrefixes());
 
     let expandCommentHistory = function () {
         let expandPaging = function () {
@@ -38,6 +64,9 @@
     }
 
     let hideOutdatedBotComments = function () {
+        // If no bots are set, don't do anything.
+        if (botNamePrefixes.length === 0) { return; }
+
         console.log("Hiding any available comments...");
         let groupedItemsToProcess = [...document.querySelectorAll(".js-comment-hide-button")] // find all the hide buttons (auto-excludes initial PR "comment" that is also a .TimelineItem element)
             .map((button) => { // Get the nearest timeline item
