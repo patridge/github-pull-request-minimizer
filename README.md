@@ -1,5 +1,7 @@
 # GitHub pull request comment minimizer
 
+> NOTE: This extension only works if you have permission to hide pull request comments normally on the current repo.
+
 Minimize GitHub comment noise in your pull requests from bots using this Google Chrome extension.
 
 Reduce the noise of repetitive bot comments in your GitHub pull requests by hiding outdated comments, keeping the focus of your pull request conversation on your contributors.
