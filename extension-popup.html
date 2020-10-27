@@ -2,12 +2,20 @@
 <html>
 <head>
     <style>
+        .danger {
+            color: #f00;
+        }
     </style>
 </head>
 <body>
-    <p>Eligible bots:</p>
-    <ul id="namePrefixes"></ul>
-    <button id="hideOutdatedComments">Hide outdated bot comments</button>
+    <div>
+        <p>Eligible prefixes:</p>
+        <ul id="namePrefixes"></ul>
+        <button id="hideOutdatedCommentsTemporary">Hide outdated</button> <button id="hideOutdatedCommentsForever" class="danger">Hide forever</button>
+    </div>
+    <div>
+        <button id="reshowCommentsButton">Reshow</button>
+    </div>
     <script src="extension-popup.js"></script>
 </body>
 </html>

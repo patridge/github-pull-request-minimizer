@@ -1,5 +1,7 @@
-let hideOutdatedCommentsButton = document.getElementById('hideOutdatedComments');
+let hideOutdatedCommentsTemporaryButton = document.getElementById('hideOutdatedCommentsTemporary');
+let hideOutdatedCommentsPermanentButton = document.getElementById('hideOutdatedCommentsPermanent');
 let prefixList = document.getElementById("namePrefixes");
+let reshowCommentsButton = document.getElementById("reshowCommentsButton");
 
 let storageSyncGetAsync = function (keysAndDefaults) {
     let gotValue = new Promise((resolve, reject) => {
@@ -103,7 +105,8 @@ let displaySavedNamePrefixes = async function () {
 document.addEventListener('DOMContentLoaded', async function () {
     await setMicrosoftDocsAndLearnDefaultPrefixes();
     await displaySavedNamePrefixes();
-    hideOutdatedCommentsButton.addEventListener("click", function (element) {
+
+    hideOutdatedCommentsTemporaryButton.addEventListener("click", function (element) {
         chrome.tabs.query(
             {
                 active: true,
@@ -111,9 +114,41 @@ document.addEventListener('DOMContentLoaded', async function () {
             },
             function (tabs) {
                 chrome.tabs.executeScript(
-                    tabs[0].id,
+                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
                     {
-                        file: "comment-minimizer.js"
+                        file: "comment-hide.js"
+                    }
+                );
+            }
+        );
+    });
+    hideOutdatedCommentsPermanentButton.addEventListener("click", function (element) {
+        chrome.tabs.query(
+            {
+                active: true,
+                currentWindow: true
+            },
+            function (tabs) {
+                chrome.tabs.executeScript(
+                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
+                    {
+                        file: "comment-permanent-hide.js"
+                    }
+                );
+            }
+        );
+    });
+    reshowCommentsButton.addEventListener("click", function (element) {
+        chrome.tabs.query(
+            {
+                active: true,
+                currentWindow: true
+            },
+            function (tabs) {
+                chrome.tabs.executeScript(
+                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
+                    {
+                        file: "comment-hide-restore.js"
                     }
                 );
             }
