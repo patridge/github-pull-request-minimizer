@@ -1,0 +1,15 @@
+{
+  "name": "github-pull-request-minimizer",
+  "version": "0.0.0",
+  "description": "Minimize GitHub comment noise in your pull requests from bots using this Google Chrome extension.",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chrome": "0.0.103"
+  }
+}
