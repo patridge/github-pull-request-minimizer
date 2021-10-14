@@ -122,22 +122,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         );
     });
-    hideOutdatedCommentsPermanentButton.addEventListener("click", function (element) {
-        chrome.tabs.query(
-            {
-                active: true,
-                currentWindow: true
-            },
-            function (tabs) {
-                chrome.tabs.executeScript(
-                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
-                    {
-                        file: "comment-permanent-hide.js"
-                    }
-                );
-            }
-        );
-    });
     reshowCommentsButton.addEventListener("click", function (element) {
         chrome.tabs.query(
             {

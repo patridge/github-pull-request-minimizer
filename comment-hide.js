@@ -52,26 +52,26 @@
         return element.offsetWidth === 0 && element.offsetHeight === 0;
     };
 
-    let expandCommentHistory = function () {
-        let expandPaging = function () {
-            // Look for pagination buttons to click
-            let paginationSubmitButtons = [...document.querySelectorAll(".ajax-pagination-btn")];
-            let foundPaging = paginationSubmitButtons.some(_ => true);
-            if (foundPaging) {
-                // Found pagination buttons, click one and wait before firing off this function again.
-                console.log("Loading additional comments to check...");
-                paginationSubmitButtons.forEach(btn => btn.click());
-                setTimeout(expandPaging, 3000);
-                // hideOutdatedBotCommentsPermanently();
-                hideOutdatedBotCommentsTemporarily();
-            }
-            else {
-                // No more pagination buttons found, proceed with hiding comments.
-                console.log("Done loading additional comments.");
-            }
-        };
-        expandPaging();
-    }
+    // NOTE: Currently removed from standard functionality
+    // let expandCommentHistory = function () {
+    //     let expandPaging = function () {
+    //         // Look for pagination buttons to click
+    //         let paginationSubmitButtons = [...document.querySelectorAll(".ajax-pagination-btn")];
+    //         let foundPaging = paginationSubmitButtons.some(_ => true);
+    //         if (foundPaging) {
+    //             // Found pagination buttons, click one and wait before firing off this function again.
+    //             console.log("Loading additional comments to check...");
+    //             paginationSubmitButtons.forEach(btn => btn.click()); // ? Maybe do `btn.dispatchEvent(new Event('click'));` instead, since `click` is complaining that it doesn't exist on an Element object. Or figure out how to make sure `btn` is of type Element earlier.
+    //             setTimeout(expandPaging, 3000);
+    //             hideOutdatedBotCommentsTemporarily();
+    //         }
+    //         else {
+    //             // No more pagination buttons found, proceed with hiding comments.
+    //             console.log("Done loading additional comments.");
+    //         }
+    //     };
+    //     expandPaging();
+    // }
 
     let hideOutdatedBotCommentsTemporarily = function () {
         // If no bots are set, don't do anything.
@@ -79,24 +79,26 @@
 
         let hideTimelineItem = (timelineItemInfo) => {
             // Find the part we wish to hide within the timeline item.
-            let commentContentArea = timelineItemInfo.timelineItem.querySelector(".edit-comment-hide");
-            if (commentContentArea === null) {
-                // Some timeline items aren't comments...skipping these.
-                return;
+            if (timelineItemInfo.timelineItem) {
+                let commentContentArea = timelineItemInfo.timelineItem.querySelector(".edit-comment-hide");
+                if (commentContentArea === null) {
+                    // Some timeline items aren't comments...skipping these.
+                    return;
+                }
+    
+                let isCommentAlreadyHidden = isElementHidden(commentContentArea);
+                if (isCommentAlreadyHidden) {
+                    return;
+                }
+    
+                // Add marker CSS classes to make it easy to reverse hiding later.
+                // One CSS class to indicate a comment that was hidden (easy to find all).
+                commentContentArea.classList.add(extensionClassForTemporaryHideRestoration);
+                // One CSS class to indicate the prior display state for accurate restoration later.
+                commentContentArea.classList.add(`${extensionClassPrefixForTemproraryHideRestorationState}${getComputedStyle(commentContentArea).display}`);
+                // Hide via CSS.
+                commentContentArea.style.display = "none";
             }
-
-            let isCommentAlreadyHidden = isElementHidden(commentContentArea);
-            if (isCommentAlreadyHidden) {
-                return;
-            }
-
-            // Add marker CSS classes to make it easy to reverse hiding later.
-            // One CSS class to indicate a comment that was hidden (easy to find all).
-            commentContentArea.classList.add(extensionClassForTemporaryHideRestoration);
-            // One CSS class to indicate the prior display state for accurate restoration later.
-            commentContentArea.classList.add(`${extensionClassPrefixForTemproraryHideRestorationState}${getComputedStyle(commentContentArea).display}`);
-            // Hide via CSS.
-            commentContentArea.style.display = "none";
         };
 
         console.log("Hiding [temporarily] any available comments...");
@@ -143,64 +145,9 @@
         [...document.querySelectorAll(".js-timeline-item")] // find all the timeline items
             .forEach((timelineItem) => hideTimelineItem(timelineItem));
     };
-    // let hideOutdatedBotCommentsPermanently = function () {
-    //     // If no bots are set, don't do anything.
-    //     if (botNamePrefixes.length === 0) { return; }
 
-    //     console.log("Hiding [permanently] any available comments...");
-    //     let groupedItemsToProcess = [...document.querySelectorAll(".js-comment-hide-button")] // find all the hide buttons (auto-excludes initial PR "comment" that is also a .TimelineItem element)
-    //         .map((button) => { // Get the nearest timeline item
-    //             let timelineItem = button.closest(".js-timeline-item");
-    //             return {
-    //                 timelineItem: timelineItem,
-    //                 commentHideButton: button,
-    //                 foundAuthorPrefix: (() => {
-    //                     let isTimelineItemAlreadyHidden = [...timelineItem.getElementsByClassName("minimized-comment")].some(element => element.offsetWidth > 0 && element.offsetHeight > 0);
-
-    //                     if (isTimelineItemAlreadyHidden) {
-    //                         // Already showing minimized message: return null to filter later
-    //                         return null;
-    //                     }
-    //                     let author = timelineItem.getElementsByClassName("author")[0].innerText;
-    //                     let foundBotNamePrefix = botNamePrefixes.find(botNamePrefix => author.startsWith(botNamePrefix));
-    //                     if (!foundBotNamePrefix) {
-    //                         // Not a bot prefix author: return null to filter later
-    //                         return null;
-    //                     }
-    //                     return foundBotNamePrefix;
-    //                 })(),
-    //                 itemDate: (() => {
-    //                     return Date.parse(timelineItem.getElementsByClassName("js-timestamp")[0].getElementsByTagName("relative-time")[0].getAttribute("datetime"));
-    //                 })()
-    //             };
-    //         })
-    //         .filter((historyItem) => historyItem.foundAuthorPrefix !== null)
-    //         .groupBy((historyItem) => historyItem.foundAuthorPrefix);
-
-    //     for (var itemGroup in groupedItemsToProcess) {
-    //         if (groupedItemsToProcess.hasOwnProperty(itemGroup)) {
-    //             let sortedItemsWithoutNewest = [...groupedItemsToProcess[itemGroup]].sort(function (a, b) { a.itemDate - b.itemDate }).slice(0, -1);
-    //             sortedItemsWithoutNewest.forEach(itemToHide => {
-    //                 // form.js-comment-minimize
-    //                 let commentHideForm = itemToHide.timelineItem.getElementsByClassName("js-comment-minimize")[0];
-    //                 // > select[name="classifier"]
-    //                 let commentHideReasonSelect = [...commentHideForm.getElementsByTagName("select")].filter(e => e.getAttribute("name") === "classifier")[0];
-    //                 // > button.btn[type="submit"]
-    //                 let commentHideSubmitButton = [...commentHideForm.getElementsByTagName("button")].filter(e => e.classList.contains("btn") && e.getAttribute("type") === "submit")[0];
-
-    //                 // itemToHide.timelineItem.style.border = "1px solid red";
-    //                 itemToHide.commentHideButton.click();
-
-    //                 // select: option[value="OUTDATED"]
-    //                 commentHideReasonSelect.value = "OUTDATED";
-    //                 // Submit form with button.click()
-    //                 commentHideSubmitButton.click();
-    //             });
-    //         }
-    //     }
-    // };
-
+    // NOTE: Removing auto-expansion of comments not loaded on initial page request. This means the user would need to hide comments every time they load more, but it means the page won't load potentially-massive comment histories just to hide a bunch of things.
+    // TODO: We'd like to hide on first page load and then hide any newly shown applicable comments as they are shown.
+    //expandCommentHistory();
     hideOutdatedBotCommentsTemporarily();
-    // hideOutdatedBotCommentsPermanently();
-    // expandCommentHistory();
 })();
