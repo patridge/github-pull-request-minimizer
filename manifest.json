@@ -15,6 +15,14 @@
     ],
     "persistent": false
   },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/pull/*"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "js": ["comment-hide.js"]
+    }
+  ],
   "page_action": {
     "default_popup": "extension-popup.html",
     "default_icon": {
@@ -29,6 +37,6 @@
     "32": "images/github-comment-minimizer-icon32.png",
     "48": "images/github-comment-minimizer-icon48.png",
     "128": "images/github-comment-minimizer-icon128.png"
-},
+  },
   "manifest_version": 2
 }

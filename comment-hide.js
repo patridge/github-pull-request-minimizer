@@ -1,6 +1,42 @@
 // @ts-check
 
+// TODO: It appears this entire file is executed from scratch for each button press within the extension pop-up. This can cause some excessive mutation observers and such. The end result isn't too painful, but definitely isn't ideal. This is likely because the file is executed as a content script initially/automatically and then within events for extension-popup.js.
 (async function () {
+    // HACK: This was scoped within this immediately executing function to avoid the above TODO issue where the page is loaded multiple times, causing a runtime error with defining `options` repeatedly.
+    // HACK: Duplicated directly from options.js until we can figure out a better code reuse strategy (modules?).
+    let options = (function () {
+        const storageSyncGetAsync = function (keysAndDefaults) {
+            const gotValue = new Promise((resolve, reject) => {
+                chrome.storage.sync.get(
+                    keysAndDefaults, // NOTE: `null` will get entire contents of storage
+                    function (result) {
+                        // Keys could be a string or an array of strings (or any object to get back an empty result, or null to get all of cache).
+                        // Unify to an array regardless.
+                        let keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
+                        for (var keyIndex in keyList) {
+                            var key = keyList[keyIndex];
+                            if (result[key]) {
+                                console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
+                            }
+                            else {
+                                console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
+                            }
+                        }
+                        resolve(result);
+                    }
+                );
+            });
+            return gotValue;
+        };
+        const getAutoHideEnabledSetting = async function () {
+            const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
+            return autoHideSetting;
+        };
+        return {
+            getAutoHideEnabledSetting,
+        };
+    })();
+
     const extensionClassForTemporaryHideRestoration = "github-pr-minifier-minified";
     const extensionClassPrefixForTemproraryHideRestorationState = "minified-from-display-";
 
@@ -52,30 +88,11 @@
         return element.offsetWidth === 0 && element.offsetHeight === 0;
     };
 
-    // NOTE: Currently removed from standard functionality
-    // let expandCommentHistory = function () {
-    //     let expandPaging = function () {
-    //         // Look for pagination buttons to click
-    //         let paginationSubmitButtons = [...document.querySelectorAll(".ajax-pagination-btn")];
-    //         let foundPaging = paginationSubmitButtons.some(_ => true);
-    //         if (foundPaging) {
-    //             // Found pagination buttons, click one and wait before firing off this function again.
-    //             console.log("Loading additional comments to check...");
-    //             paginationSubmitButtons.forEach(btn => btn.click()); // ? Maybe do `btn.dispatchEvent(new Event('click'));` instead, since `click` is complaining that it doesn't exist on an Element object. Or figure out how to make sure `btn` is of type Element earlier.
-    //             setTimeout(expandPaging, 3000);
-    //             hideOutdatedBotCommentsTemporarily();
-    //         }
-    //         else {
-    //             // No more pagination buttons found, proceed with hiding comments.
-    //             console.log("Done loading additional comments.");
-    //         }
-    //     };
-    //     expandPaging();
-    // }
-
     let hideOutdatedBotCommentsTemporarily = function () {
         // If no bots are set, don't do anything.
         if (botNamePrefixes.length === 0) { return; }
+
+        console.log("Hiding [temporarily] any available comments...");
 
         let hideTimelineItem = (timelineItemInfo) => {
             // Find the part we wish to hide within the timeline item.
@@ -100,8 +117,6 @@
                 commentContentArea.style.display = "none";
             }
         };
-
-        console.log("Hiding [temporarily] any available comments...");
 
         var timelineItemsGroupedByAuthor = [...document.querySelectorAll(".js-timeline-item")] // find all the timeline items
         .map((timelineItem) => {
@@ -146,8 +161,29 @@
             .forEach((timelineItem) => hideTimelineItem(timelineItem));
     };
 
-    // NOTE: Removing auto-expansion of comments not loaded on initial page request. This means the user would need to hide comments every time they load more, but it means the page won't load potentially-massive comment histories just to hide a bunch of things.
-    // TODO: We'd like to hide on first page load and then hide any newly shown applicable comments as they are shown.
-    //expandCommentHistory();
-    hideOutdatedBotCommentsTemporarily();
+    const hasAutoHideEnabled = await options.getAutoHideEnabledSetting();
+    // if (hasAutoHideEnabled === true) {
+    //     hideOutdatedBotCommentsTemporarily();
+    // }
+
+    // When new items are added to the conversation timeline, re-apply the hiding process as appropriate. We blindly react to new elements being added to the discussion element, with a slight delay to allow for mass changes before running the hiding process a single time after things have settled.
+    let hideCommentsCallPending = false;
+    const newCommentsShownObserver = new MutationObserver(function(mutations) {
+        // Wrap later-called function around hiding to handle hiding elements and also resetting the debounce flag.
+        const handleHideComments = function () {
+            hideOutdatedBotCommentsTemporarily();
+            hideCommentsCallPending = false;
+        };
+
+        // FUTURE: May be worth checking for hide-eligible elements being added before running this (via mutation.addedNodes.forEach, potentially). Currently running if any nodes are added to the discussion, regardless of the eligibility to hide as a bot comment.
+        const mutationsWithAddedNodes = mutations.filter(mutation => mutation.addedNodes.length > 0);
+        if (hasAutoHideEnabled === true
+          && hideCommentsCallPending === false
+          && mutationsWithAddedNodes.length > 0) {
+            hideCommentsCallPending = true;
+            setTimeout(handleHideComments, 500);
+        }
+    });
+    // HACK: This observer is established early enough in the page lifecycle to be run as the first-run as well as future page mutations.
+    newCommentsShownObserver.observe(document.getElementById("discussion_bucket"), {childList: true, subtree: true});
 })();

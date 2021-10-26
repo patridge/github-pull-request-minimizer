@@ -4,6 +4,7 @@ const newNamePrefixInput = document.getElementById("newNamePrefixInput");
 const addNewPrefixButton = document.getElementById("addNewPrefixButton");
 const statusLabel = document.getElementById("status");
 const prefixList = document.getElementById("namePrefixes");
+const autoHideCommentsCheckbox = document.getElementById("autoHideComments");
 
 const delay = function (timeInMilliseconds) {
     return new Promise(resolve => setTimeout(resolve, timeInMilliseconds));
@@ -64,12 +65,33 @@ const storageSyncSetAsync = function (items) {
     return setValue;
 };
 
+const getAutoHideEnabledSetting = async function () {
+    const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
+    return autoHideSetting;
+};
+const setAutoHideEnabledSetting = async function (autoHideEnabled) {
+    await storageSyncSetAsync({ isAutoHideEnabled: autoHideEnabled });
+};
+const displayAutoHideSetting = async function () {
+    const currentAutoHideSetting = await getAutoHideEnabledSetting();
+    autoHideCommentsCheckbox.checked = currentAutoHideSetting;
+    // if (currentAutoHideSetting) {
+    // }
+    // else {
+    //     autoHideCommentsCheckbox.removeAttribute("checked");
+    // }
+};
+const saveAutoHideSetting = async function (event) {
+    const newAutoHideSetting = event.target.checked;
+    setAutoHideEnabledSetting(newAutoHideSetting);
+};
+
 const getHasSetCustomPrefixes = async function () {
     return (await storageSyncGetAsync({ hasSetPrefixes: false })).hasSetPrefixes;
-}
+};
 const setHasSetCustomPrefixes = async function () {
     await storageSyncSetAsync({ hasSetPrefixes: true });
-}
+};
 const getPrefixes = async function () {
     const currentSavedPrefixes = await storageSyncGetAsync(
         {
@@ -194,8 +216,10 @@ const displaySavedNamePrefixes = async function () {
         });
     // Display new list of items
     savedNamePrefixes.forEach(li => prefixList.appendChild(li));
-}
+};
 
 addNewPrefixButton.addEventListener("click", addNewPrefixButtonClick);
 document.addEventListener('DOMContentLoaded', displaySavedNamePrefixes);
 document.addEventListener('DOMContentLoaded', setMicrosoftDocsAndLearnDefaultPrefixes);
+autoHideCommentsCheckbox.addEventListener("click", saveAutoHideSetting)
+document.addEventListener('DOMContentLoaded', displayAutoHideSetting);
