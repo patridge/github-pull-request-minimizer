@@ -16,7 +16,6 @@
                 }
 
                 let priorDisplayStyle = hiddenCommentPriorDisplayStateClass.substring(extensionClassPrefixForTemproraryHideRestorationState.length);
-                console.log(priorDisplayStyle);
                 // Re-show via CSS.
                 hiddenComment.style.display = priorDisplayStyle;
                 // Remove hidden comment classes going forward.

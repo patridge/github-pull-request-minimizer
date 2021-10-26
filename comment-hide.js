@@ -16,12 +16,12 @@
                         let keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
                         for (var keyIndex in keyList) {
                             var key = keyList[keyIndex];
-                            if (result[key]) {
-                                console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
-                            }
-                            else {
-                                console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
-                            }
+                            // if (result[key]) {
+                            //     console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
+                            // }
+                            // else {
+                            //     console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
+                            // }
                         }
                         resolve(result);
                     }
@@ -61,12 +61,12 @@
                     let keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
                     for (var keyIndex in keyList) {
                         var key = keyList[keyIndex];
-                        if (result[key]) {
-                            console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
-                        }
-                        else {
-                            console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
-                        }
+                        // if (result[key]) {
+                        //     console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
+                        // }
+                        // else {
+                        //     console.log({status: `Cache miss: [${key}]`, keys: keysAndDefaults });
+                        // }
                     }
                     resolve(result);
                 }
@@ -80,7 +80,7 @@
                 namePrefixes: []
             }
         );
-        console.log(currentSavedPrefixes);
+        //console.log(currentSavedPrefixes);
         return currentSavedPrefixes.namePrefixes;
     };
     let botNamePrefixes = (await getPrefixes());
