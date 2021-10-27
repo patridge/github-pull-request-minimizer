@@ -1,12 +1,53 @@
-# GitHub pull request comment minimizer
+# GitHub pull request (PR) comment minimizer
 
 Minimize GitHub comment noise in your pull requests from bots using this Google Chrome extension.
 
-Reduce the noise of repetitive bot comments in your GitHub pull requests by hiding outdated comments, keeping the focus of your pull request conversation on your contributors.
+Reduce the noise of repetitive bot comments in your GitHub pull requests by visually hiding outdated comments, keeping the focus of your pull request conversation on contributor comments. This extension will leave the latest comment from any of the defined bots, but hide any older comments.
 
-Once installed, from any GitHub pull request (currently limited to MicrosoftDocs repo bots), click the toolbar icon and select "Hide outdated bot comments". The extension will leave the latest comment from any of the defined bots, but hide any older comments.
+By default, the bot prefixes used are the most common ones found in MicrosoftDocs repos:
 
-If you ever hide a comment you need shown, you can always click "Show comment" to restore its visibility.
+* **opbld**
+* **PRMerger**
+* **acrolinxatmsft**
+
+You can change these to add new prefixes, remove existing ones, or replace the default list entirely.
+
+> [!NOTE]
+> Prior versions of this extension would allow for hiding comments permanently via an official GitHub mechanism. This required elevated permissions, restricting the usefulness. As of version 0.4.0, this extension will only hide comments visually within your browser. Nothing is persisted and will require the browser extension for anyone else to experience the comment hiding.
+
+## How do I hide bot comments in a PR?
+
+Once installed, when viewing any GitHub pull request, all eligible  bot comments will be hidden visually automatically when the page loads. Additionally, when expanding a large comment history, any newly shown eligible comments will be hidden. The eligibility of a comment is based on the prefix of the commenter's GitHub username. The extension will hide all but the newest comment from any given bot.
+
+## How do I re-show hidden bot comments in a PR?
+
+To re-show hidden comments, click the extension toolbar icon and click the **Reshow hidden comments** button. Any hidden comments will be restored visually again. Clicking the **Hide outdated for session** will hide those comments again.
+
+## How do I customize which bot name prefixes are eligible to hide?
+
+To customize the bot name prefixes you want to hide, you'll have to edit the prefixes in the extension options once it's installed.
+
+1. Find the GitHub comment minimizer extension button in the Chrome/Edge toolbar.
+1. Right-click the button and select **Options**.
+
+    ![Screenshot of extension button contextual menu with the Options choice highlighted](media/extension-right-click-options.png)
+
+To add a new prefix, use the textbox at the bottom of the options page and click **Add**. To remove an existing prefix, click the **Remove** button next to it.
+
+![Screenshot of extension options screen to add or remove name prefixes.](media/extension-options-edit.png)
+
+Your bot prefix choices will sync to any other computers where you log in with the same browser account and install the GitHub comment minimizer extension.
+
+## How do I disable the auto-hiding of comments when the page loads?
+
+You can disable automatic hiding of eligible comments by toggling the auto-hide setting in the extension options.
+
+1. Find the GitHub comment minimizer extension button in the Chrome/Edge toolbar.
+1. Right-click the button and select **Options**.
+
+    ![Screenshot of extension button contextual menu with the Options choice highlighted](media/extension-right-click-options.png)
+
+To disable automatic hiding of outdated bot comments by unchecking the **Auto-hide old bot comments** option.
 
 ## Installation
 
@@ -38,19 +79,3 @@ For Microsoft Edge, you'll first need to allow installing extensions from other 
 1. Click the **Add to Chrome** button on the extension page.
 1. Confirm the extension install by clicking the **Add extension** button from the resulting pop-up.
     ![Screenshot of pop-up prompt confirming Chrome extension install](media/edge-confirm-extension-install.png)
-
-## Current bot name prefixes
-
-Until this extension allows you to customize the bot name prefixes, it is set to minimize bots with the following prefixes:
-
-* `opbld`
-* `PRMerger`
-* `acrolinxatmsft`
-
-## Roadmap
-
-Here are the current plans for upcoming releases. These are definitely subject to change as this project develops or evolves.
-
-### v0.3+: Customization
-
-* Allow customization of excluded bots within extension

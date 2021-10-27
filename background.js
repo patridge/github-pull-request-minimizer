@@ -1,12 +1,11 @@
-chrome.runtime.onInstalled.addListener(function() {
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
+chrome.runtime.onInstalled.addListener(async function () {
+    chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
         chrome.declarativeContent.onPageChanged.addRules([{
             conditions: [
                 new chrome.declarativeContent.PageStateMatcher({
                     pageUrl: {
                         hostEquals: "github.com",
-                        // pathPrefix: "MicrosoftDocs"
-                        pathContains: "/MicrosoftDocs/" // Not super specific here, but may be good enough (other options: https://developer.chrome.com/extensions/declarativeContent#type-PageStateMatcher).
+                        pathContains: "/pull/"
                     },
                 })
             ],
