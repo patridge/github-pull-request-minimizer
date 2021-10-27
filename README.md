@@ -1,30 +1,31 @@
-# GitHub pull request comment minimizer
-
-> NOTE: This extension only works if you have permission to hide pull request comments normally on the current repo.
+# GitHub pull request (PR) comment minimizer
 
 Minimize GitHub comment noise in your pull requests from bots using this Google Chrome extension.
 
-Reduce the noise of repetitive bot comments in your GitHub pull requests by hiding outdated comments, keeping the focus of your pull request conversation on your contributors.
-
-Once installed, from any GitHub pull request (currently limited to MicrosoftDocs repo bots), click the toolbar icon and select "Hide outdated bot comments". The extension will leave the latest comment from any of the defined bots, but hide any older comments.
-
-If you ever hide a comment you need shown, you can always click "Show comment" to restore its visibility.
-
-## Bot name prefixes
-
-As of v0.3.0, you can customize the bot name prefixes used to identify outdated comments that need to be hidden.
+Reduce the noise of repetitive bot comments in your GitHub pull requests by visually hiding outdated comments, keeping the focus of your pull request conversation on contributor comments. This extension will leave the latest comment from any of the defined bots, but hide any older comments.
 
 By default, the bot prefixes used are the most common ones found in MicrosoftDocs repos:
 
-* `opbld`
-* `PRMerger`
-* `acrolinxatmsft`
+* **opbld**
+* **PRMerger**
+* **acrolinxatmsft**
 
 You can change these to add new prefixes, remove existing ones, or replace the default list entirely.
 
-### Customize with your own bot name prefixes
+> [!NOTE]
+> Prior versions of this extension would allow for hiding comments permanently via an official GitHub mechanism. This required elevated permissions, restricting the usefulness. As of version 0.4.0, this extension will only hide comments visually within your browser. Nothing is persisted and will require the browser extension for anyone else to experience the comment hiding.
 
-To customize the bot name prefixes you want to hide, you'll have to edit them in the options for this extension once it's installed.
+## How do I hide bot comments in a PR?
+
+Once installed, when viewing any GitHub pull request, all eligible  bot comments will be hidden visually automatically when the page loads. Additionally, when expanding a large comment history, any newly shown eligible comments will be hidden. The eligibility of a comment is based on the prefix of the commenter's GitHub username. The extension will hide all but the newest comment from any given bot.
+
+## How do I re-show hidden bot comments in a PR?
+
+To re-show hidden comments, click the extension toolbar icon and click the **Reshow hidden comments** button. Any hidden comments will be restored visually again. Clicking the **Hide outdated for session** will hide those comments again.
+
+## How do I customize which bot name prefixes are eligible to hide?
+
+To customize the bot name prefixes you want to hide, you'll have to edit the prefixes in the extension options once it's installed.
 
 1. Find the GitHub comment minimizer extension button in the Chrome/Edge toolbar.
 1. Right-click the button and select **Options**.
@@ -36,6 +37,17 @@ To add a new prefix, use the textbox at the bottom of the options page and click
 ![Screenshot of extension options screen to add or remove name prefixes.](media/extension-options-edit.png)
 
 Your bot prefix choices will sync to any other computers where you log in with the same browser account and install the GitHub comment minimizer extension.
+
+## How do I disable the auto-hiding of comments when the page loads?
+
+You can disable automatic hiding of eligible comments by toggling the auto-hide setting in the extension options.
+
+1. Find the GitHub comment minimizer extension button in the Chrome/Edge toolbar.
+1. Right-click the button and select **Options**.
+
+    ![Screenshot of extension button contextual menu with the Options choice highlighted](media/extension-right-click-options.png)
+
+To disable automatic hiding of outdated bot comments by unchecking the **Auto-hide old bot comments** option.
 
 ## Installation
 
