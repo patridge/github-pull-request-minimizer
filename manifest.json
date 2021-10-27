@@ -1,8 +1,8 @@
 {
   "name": "GitHub comment minimizer",
   "short_name": "GHMinimizer",
-  "description": "If several bots fight for attention in your GitHub pull requests, this will allow you to hide all old comments as outdated.",
-  "version": "0.3.1",
+  "description": "If several bots fight for attention in your GitHub pull requests, this will allow you to hide all old comments visually in your PR timeline.",
+  "version": "0.4.0",
   "options_page": "options.html",
   "permissions": [
     "activeTab",
@@ -15,6 +15,14 @@
     ],
     "persistent": false
   },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/pull/*"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "js": ["comment-hide.js"]
+    }
+  ],
   "page_action": {
     "default_popup": "extension-popup.html",
     "default_icon": {
@@ -29,6 +37,6 @@
     "32": "images/github-comment-minimizer-icon32.png",
     "48": "images/github-comment-minimizer-icon48.png",
     "128": "images/github-comment-minimizer-icon128.png"
-},
+  },
   "manifest_version": 2
 }

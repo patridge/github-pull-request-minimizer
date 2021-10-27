@@ -3,11 +3,19 @@
 <head><title>Options - GitHub pull request minimizer</title></head>
 <body>
 
-Bot name prefixes to hide:
-<ul id="namePrefixes"></ul>
+<div>
+    <input type="checkbox" id="autoHideComments" name="autoHideComments"/> <label for="autoHideComments">Auto-hide old bot prefixes</label>
+</div>
 
-Add name prefix:
-<input type="text" id="newNamePrefixInput" /><button id="addNewPrefixButton">Add</button>
+<div>
+    Bot name prefixes to hide:
+    <ul id="namePrefixes"></ul>
+</div>
+
+<div>
+    Add name prefix:
+    <input type="text" id="newNamePrefixInput" /><button id="addNewPrefixButton">Add</button>
+</div>
 
 <div id="status"></div>
 

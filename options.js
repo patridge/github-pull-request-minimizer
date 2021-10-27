@@ -1,15 +1,31 @@
 // TODO: Offer options button from main pop-up
 
-let newNamePrefixInput = document.getElementById("newNamePrefixInput");
-let addNewPrefixButton = document.getElementById("addNewPrefixButton");
-let statusLabel = document.getElementById("status");
-let prefixList = document.getElementById("namePrefixes");
+const newNamePrefixInput = document.getElementById("newNamePrefixInput");
+const addNewPrefixButton = document.getElementById("addNewPrefixButton");
+const statusLabel = document.getElementById("status");
+const prefixList = document.getElementById("namePrefixes");
+const autoHideCommentsCheckbox = document.getElementById("autoHideComments");
 
-let delay = function (timeInMilliseconds) {
+const delay = function (timeInMilliseconds) {
     return new Promise(resolve => setTimeout(resolve, timeInMilliseconds));
 }
-let storageSyncGetAsync = function (keysAndDefaults) {
-    let gotValue = new Promise((resolve, reject) => {
+const confirm = async function (message, action, successMessage) {
+    const didConfirm = window.confirm(message);
+    if (didConfirm) {
+        await action();
+        if (successMessage) {
+            await displayStatus(successMessage);
+        }
+    }
+};
+const displayStatus = async function (statusMessage) {
+    statusLabel.textContent = statusMessage;
+    await delay(1500);
+    statusLabel.textContent = "";
+};
+
+const storageSyncGetAsync = function (keysAndDefaults) {
+    const gotValue = new Promise((resolve, reject) => {
         chrome.storage.sync.get(
             keysAndDefaults, // NOTE: `null` will get entire contents of storage
             function (result) {
@@ -31,8 +47,8 @@ let storageSyncGetAsync = function (keysAndDefaults) {
     });
     return gotValue;
 };
-let storageSyncSetAsync = function (items) {
-    let setValue = new Promise((resolve, reject) => {
+const storageSyncSetAsync = function (items) {
+    const setValue = new Promise((resolve, reject) => {
         chrome.storage.sync.set(
             items,
             function () {
@@ -49,14 +65,35 @@ let storageSyncSetAsync = function (items) {
     return setValue;
 };
 
-let getHasSetCustomPrefixes = async function () {
+const getAutoHideEnabledSetting = async function () {
+    const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
+    return autoHideSetting;
+};
+const setAutoHideEnabledSetting = async function (autoHideEnabled) {
+    await storageSyncSetAsync({ isAutoHideEnabled: autoHideEnabled });
+};
+const displayAutoHideSetting = async function () {
+    const currentAutoHideSetting = await getAutoHideEnabledSetting();
+    autoHideCommentsCheckbox.checked = currentAutoHideSetting;
+    // if (currentAutoHideSetting) {
+    // }
+    // else {
+    //     autoHideCommentsCheckbox.removeAttribute("checked");
+    // }
+};
+const saveAutoHideSetting = async function (event) {
+    const newAutoHideSetting = event.target.checked;
+    setAutoHideEnabledSetting(newAutoHideSetting);
+};
+
+const getHasSetCustomPrefixes = async function () {
     return (await storageSyncGetAsync({ hasSetPrefixes: false })).hasSetPrefixes;
-}
-let setHasSetCustomPrefixes = async function () {
+};
+const setHasSetCustomPrefixes = async function () {
     await storageSyncSetAsync({ hasSetPrefixes: true });
-}
-let getPrefixes = async function () {
-    let currentSavedPrefixes = await storageSyncGetAsync(
+};
+const getPrefixes = async function () {
+    const currentSavedPrefixes = await storageSyncGetAsync(
         {
             namePrefixes: []
         }
@@ -64,10 +101,10 @@ let getPrefixes = async function () {
     console.log(currentSavedPrefixes);
     return currentSavedPrefixes.namePrefixes;
 };
-let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
-    let hasSetCustomPrefixes = await getHasSetCustomPrefixes();
+const setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
+    const hasSetCustomPrefixes = await getHasSetCustomPrefixes();
     if (!hasSetCustomPrefixes) {
-        let currentPrefixes = await getPrefixes();
+        const currentPrefixes = await getPrefixes();
         if (currentPrefixes.length !== 0) {
             return;
         }
@@ -75,7 +112,7 @@ let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
         statusLabel.textContent = "Setting up defaults prefix...";
 
         // Set up MicrosoftDocs defaults
-        let microsoftDocsDefaultPrefixes = [
+        const microsoftDocsDefaultPrefixes = [
             "opbld",
             "PRMerger",
             "acrolinxatmsft"
@@ -91,18 +128,18 @@ let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
     }
 };
 
-let saveNewNamePrefix = async function (namePrefix) {
-    let currentSavedPrefixes = await getPrefixes();
+const saveNewNamePrefix = async function (namePrefix) {
+    const currentSavedPrefixes = await getPrefixes();
     // Append new prefix to list
-    let newPrefixesToSave = [...currentSavedPrefixes, namePrefix];
+    const newPrefixesToSave = [...currentSavedPrefixes, namePrefix];
     // Save new prefix list to storage
     await storageSyncSetAsync({ namePrefixes: newPrefixesToSave });
     setHasSetCustomPrefixes();
 };
-let addNewPrefixButtonClick = async function(event) {
+const addNewPrefixButtonClick = async function(event) {
     statusLabel.textContent = "Adding prefix...";
 
-    let newNamePrefix = newNamePrefixInput.value;
+    const newNamePrefix = newNamePrefixInput.value;
     await saveNewNamePrefix(newNamePrefix);
     newNamePrefixInput.value = "";
 
@@ -117,22 +154,22 @@ let addNewPrefixButtonClick = async function(event) {
     statusLabel.textContent = "";
 };
 
-let getSiblings = function (el, filter) {
-    var siblings = [];
+const getSiblings = function (el, filter) {
+    const siblings = [];
     el = el.parentNode.firstChild;
     do { if (!filter || filter(el)) siblings.push(el); } while (el = el.nextSibling);
     return siblings;
 };
-let removePrefixClick = async function (event) {
+const removePrefixClick = async function (event) {
     statusLabel.textContent = "Removing prefix...";
 
-    let removeButtonSender = event.target;
+    const removeButtonSender = event.target;
     // Find adjacent text node with prefix value
-    let prefixSpan = getSiblings(removeButtonSender, (sibling) => sibling.tagName.toLowerCase() === "span")[0];
-    let prefixToRemove = prefixSpan.textContent;
+    const prefixSpan = getSiblings(removeButtonSender, (sibling) => sibling.tagName.toLowerCase() === "span")[0];
+    const prefixToRemove = prefixSpan.textContent;
 
     // Confirm removal
-    let confirmed = window.confirm(`Delete '${prefixToRemove}'?`);
+    const confirmed = window.confirm(`Delete '${prefixToRemove}'?`);
     if (!confirmed) {
         statusLabel.textContent = "Remove cancelled.";
         await delay(1500);
@@ -144,9 +181,9 @@ let removePrefixClick = async function (event) {
     // Remove event
     removeButtonSender.removeEventListener("click", removePrefixClick);
     // Get saved prefixes
-    let savedNamePrefixes = (await getPrefixes());
+    const savedNamePrefixes = (await getPrefixes());
     // Trim out removed prefix (if found)
-    let newNamePrefixes = savedNamePrefixes.filter(prefix => prefix !== prefixToRemove);
+    const newNamePrefixes = savedNamePrefixes.filter(prefix => prefix !== prefixToRemove);
     // Save latest prefix list (assumes it was changed)
     await storageSyncSetAsync({ namePrefixes: newNamePrefixes });
     setHasSetCustomPrefixes();
@@ -161,16 +198,16 @@ let removePrefixClick = async function (event) {
 
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
-let displaySavedNamePrefixes = async function () {
+const displaySavedNamePrefixes = async function () {
     // Clear list display
     [...prefixList.childNodes].forEach(child => prefixList.removeChild(child));
     // Get latest list and create items from them, with event handlers
-    let savedNamePrefixes = (await getPrefixes())
+    const savedNamePrefixes = (await getPrefixes())
         .map(prefix => {
-            let li = document.createElement("li");
-            let prefixSpan = document.createElement("span");
+            const li = document.createElement("li");
+            const prefixSpan = document.createElement("span");
             prefixSpan.appendChild(document.createTextNode(`${prefix}`));
-            let removeButton = document.createElement("button");
+            const removeButton = document.createElement("button");
             removeButton.appendChild(document.createTextNode("Remove"));
             removeButton.addEventListener("click", removePrefixClick);
             li.appendChild(prefixSpan);
@@ -179,8 +216,10 @@ let displaySavedNamePrefixes = async function () {
         });
     // Display new list of items
     savedNamePrefixes.forEach(li => prefixList.appendChild(li));
-}
+};
 
 addNewPrefixButton.addEventListener("click", addNewPrefixButtonClick);
 document.addEventListener('DOMContentLoaded', displaySavedNamePrefixes);
 document.addEventListener('DOMContentLoaded', setMicrosoftDocsAndLearnDefaultPrefixes);
+autoHideCommentsCheckbox.addEventListener("click", saveAutoHideSetting)
+document.addEventListener('DOMContentLoaded', displayAutoHideSetting);
