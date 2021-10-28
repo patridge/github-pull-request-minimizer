@@ -7,11 +7,11 @@
   "permissions": [
     "activeTab",
     "declarativeContent",
+    "scripting",
     "storage"
   ],
   "background": {
     "service_worker": "background.js"
-    // TODO: "type": "module" (allow further `import` calls)
   },
   "content_scripts": [
     {
