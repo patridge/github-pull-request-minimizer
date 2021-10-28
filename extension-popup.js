@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 currentWindow: true
             },
             function (tabs) {
-                chrome.tabs.executeScript(
+                chrome.scripting.executeScript(
                     null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
                     {
                         file: "comment-hide.js"
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 currentWindow: true
             },
             function (tabs) {
-                chrome.tabs.executeScript(
+                chrome.scripting.executeScript(
                     null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
                     {
                         file: "comment-hide-restore.js"
