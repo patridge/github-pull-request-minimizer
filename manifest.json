@@ -10,10 +10,8 @@
     "storage"
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": false
+    "service_worker": "background.js"
+    // TODO: "type": "module" (allow further `import` calls)
   },
   "content_scripts": [
     {
@@ -23,7 +21,7 @@
       "js": ["comment-hide.js"]
     }
   ],
-  "page_action": {
+  "action": {
     "default_popup": "extension-popup.html",
     "default_icon": {
       "16": "images/github-comment-minimizer-icon16.png",
@@ -38,5 +36,5 @@
     "48": "images/github-comment-minimizer-icon48.png",
     "128": "images/github-comment-minimizer-icon128.png"
   },
-  "manifest_version": 2
+  "manifest_version": 3
 }
