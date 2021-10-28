@@ -106,36 +106,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     await setMicrosoftDocsAndLearnDefaultPrefixes();
     await displaySavedNamePrefixes();
 
-    hideOutdatedCommentsTemporaryButton.addEventListener("click", function (element) {
-        chrome.tabs.query(
-            {
-                active: true,
-                currentWindow: true
-            },
-            function (tabs) {
-                chrome.scripting.executeScript(
-                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
-                    {
-                        file: "comment-hide.js"
-                    }
-                );
-            }
-        );
+    const getCurrentTab = async function () {
+        let queryOptions = { active: true, currentWindow: true };
+        let [tab] = await chrome.tabs.query(queryOptions);
+        return tab;
+    };
+
+    hideOutdatedCommentsTemporaryButton.addEventListener("click", async function (element) {
+        let tab = await getCurrentTab();
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: [ "comment-hide.js" ]
+        });
     });
-    reshowCommentsButton.addEventListener("click", function (element) {
-        chrome.tabs.query(
-            {
-                active: true,
-                currentWindow: true
-            },
-            function (tabs) {
-                chrome.scripting.executeScript(
-                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
-                    {
-                        file: "comment-hide-restore.js"
-                    }
-                );
-            }
-        );
+    reshowCommentsButton.addEventListener("click", async function (element) {
+        let tab = await getCurrentTab();
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: [ "comment-hide-restore.js" ]
+        });
     });
 });
