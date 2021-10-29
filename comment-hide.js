@@ -188,6 +188,13 @@
         }
     });
     // HACK: This observer is established early enough in the page lifecycle to be run as the first-run as well as future page mutations.
+    // HACK: Also, probably need to `observer.disconnect()` at some point too.
     // WARNING: Did get an error once that the first argument, the discussion element, wasn't a Node. That may mean that the discussion wasn't loaded yet, which would be unusual for a script loaded after `DOMContentLoaded` (in extension-popup.js).
-    newCommentsShownObserver.observe(document.getElementById("discussion_bucket"), {childList: true, subtree: true});
+    const pullRequestDiscussionNode = document.getElementById("discussion_bucket");
+    if (pullRequestDiscussionNode !== null) {
+        newCommentsShownObserver.observe(document.getElementById("discussion_bucket"), {childList: true, subtree: true});
+    }
+    else {
+        console.log("Could not find PR discussion log to observe for new comments.")
+    }
 })();
