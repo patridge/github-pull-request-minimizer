@@ -171,7 +171,7 @@
 
     // Handle first run through (and after re-triggering from extension pop-up, which is also currently a first-run [see hack comment at top]).
     let hideCommentsCallPending = false;
-    if (needsFirstRun) {
+    if (hasAutoHideEnabled === true && needsFirstRun === true) {
         hideCommentsCallPending = true;
         setTimeout(handleHideComments, 500);
     }
