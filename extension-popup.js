@@ -1,8 +1,3 @@
-let hideOutdatedCommentsTemporaryButton = document.getElementById('hideOutdatedCommentsTemporary');
-let hideOutdatedCommentsPermanentButton = document.getElementById('hideOutdatedCommentsPermanent');
-let prefixList = document.getElementById("namePrefixes");
-let reshowCommentsButton = document.getElementById("reshowCommentsButton");
-
 let storageSyncGetAsync = function (keysAndDefaults) {
     let gotValue = new Promise((resolve, reject) => {
         chrome.storage.sync.get(
@@ -26,29 +21,12 @@ let storageSyncGetAsync = function (keysAndDefaults) {
     });
     return gotValue;
 };
-let storageSyncSetAsync = function (items) {
-    let setValue = new Promise((resolve, reject) => {
-        chrome.storage.sync.set(
-            items,
-            function () {
-                // If this cache call fails, Chrome will have set `runtime.lastError`.
-                if (chrome.runtime.lastError) {
-                    reject(new Error(chrome.runtime.lastError.message || `Cache set error: ${chrome.runtime.lastError}`));
-                }
-                else {
-                    resolve();
-                }
-            }
-        );
-    });
-    return setValue;
-};
 
-let getHasSetCustomPrefixes = async function () {
+const getHasSetCustomPrefixes = async function () {
     return (await storageSyncGetAsync({ hasSetPrefixes: false })).hasSetPrefixes;
 }
-let getPrefixes = async function () {
-    let currentSavedPrefixes = await storageSyncGetAsync(
+const getPrefixes = async function () {
+    const currentSavedPrefixes = await storageSyncGetAsync(
         {
             namePrefixes: []
         }
@@ -56,11 +34,10 @@ let getPrefixes = async function () {
     console.log(currentSavedPrefixes);
     return currentSavedPrefixes.namePrefixes;
 };
-
-let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
-    let hasSetCustomPrefixes = await getHasSetCustomPrefixes();
+const setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
+    const hasSetCustomPrefixes = await getHasSetCustomPrefixes();
     if (!hasSetCustomPrefixes) {
-        let currentPrefixes = await getPrefixes();
+        const currentPrefixes = await getPrefixes();
         if (currentPrefixes.length !== 0) {
             return;
         }
@@ -68,7 +45,7 @@ let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
         statusLabel.textContent = "Setting up defaults prefix...";
 
         // Set up MicrosoftDocs defaults
-        let microsoftDocsDefaultPrefixes = [
+        const microsoftDocsDefaultPrefixes = [
             "opbld",
             "PRMerger",
             "acrolinxatmsft"
@@ -83,47 +60,67 @@ let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
         statusLabel.textContent = "";
     }
 };
-
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
-let displaySavedNamePrefixes = async function () {
+const displaySavedNamePrefixes = async function (listNode) {
     // Clear list display
-    [...prefixList.childNodes].forEach(child => prefixList.removeChild(child));
+    [...listNode.childNodes].forEach(child => listNode.removeChild(child));
     // Get latest list and create items from them
-    let savedNamePrefixes = (await getPrefixes())
+    const savedNamePrefixes = (await getPrefixes())
         .map(prefix => {
-            let li = document.createElement("li");
-            let prefixSpan = document.createElement("span");
+            const li = document.createElement("li");
+            const prefixSpan = document.createElement("span");
             prefixSpan.appendChild(document.createTextNode(`${prefix}`));
             li.appendChild(prefixSpan);
             return li;
         });
     // Display new list of items
-    savedNamePrefixes.forEach(li => prefixList.appendChild(li));
+    savedNamePrefixes.forEach(li => listNode.appendChild(li));
 }
 
+const getAutoHideEnabledSetting = async function () {
+    const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
+    return autoHideSetting;
+};
+const displayAutoHideSetting = async function () {
+    const currentAutoHideSetting = await getAutoHideEnabledSetting();
+    autoHideCommentsCheckbox.checked = currentAutoHideSetting;
+};
+
+const getCurrentTab = async function () {
+    const queryOptions = { active: true, currentWindow: true };
+    const [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+};
+
+const shouldAutoHideComments = false;
 document.addEventListener('DOMContentLoaded', async function () {
+    const prefixList = document.getElementById("namePrefixes");
+    const autoHideCommentsCheckbox = document.getElementById("autoHideComments");
+
     await setMicrosoftDocsAndLearnDefaultPrefixes();
-    await displaySavedNamePrefixes();
+    await displaySavedNamePrefixes(prefixList);
 
-    const getCurrentTab = async function () {
-        let queryOptions = { active: true, currentWindow: true };
-        let [tab] = await chrome.tabs.query(queryOptions);
-        return tab;
-    };
-
-    hideOutdatedCommentsTemporaryButton.addEventListener("click", async function (element) {
-        let tab = await getCurrentTab();
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: [ "comment-hide.js" ]
-        });
-    });
-    reshowCommentsButton.addEventListener("click", async function (element) {
-        let tab = await getCurrentTab();
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: [ "comment-hide-restore.js" ]
-        });
+    // Send message that session auto-hide toggle has changed.
+    autoHideCommentsCheckbox.addEventListener("change", async function (element) {
+        const tab = await getCurrentTab();
+        chrome.tabs.sendMessage(
+            tab.id,
+            {
+                method: "autoHideSessionSetting",
+                data: {
+                    autoHideSession: autoHideCommentsCheckbox.checked
+                }
+            },
+            function (response) {
+                if (!response || !response.result) {
+                    console.log("DEBUG: 'autoHideSessionSetting' sent message result was invalid", response);
+                }
+                else if (response.result === "error") {
+                    console.error("'autoHideSessionSetting' failed", response);
+                }
+                else {
+                    console.log("Auto hide session setting change handled", response);
+                }
+            }
+        );
     });
 });
