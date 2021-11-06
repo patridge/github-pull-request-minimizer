@@ -6,13 +6,9 @@
   "options_page": "options.html",
   "permissions": [
     "activeTab",
-    "declarativeContent",
     "scripting",
     "storage"
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": ["https://github.com/*/pull/*"],
