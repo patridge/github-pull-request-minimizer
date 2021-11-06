@@ -1,6 +1,5 @@
 // @ts-check
 
-// TODO: Rename this file to reflect combination of comment hide/restore.
 (async function () {
     // HACK: Duplicated directly from options.js until we can figure out a better code reuse strategy (modules?).
     const options = (function () {

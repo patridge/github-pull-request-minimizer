@@ -18,7 +18,7 @@
       "matches": ["https://github.com/*/pull/*"],
       "run_at": "document_idle",
       "all_frames": true,
-      "js": ["comment-hide.js"]
+      "js": ["comment-visibility.js"]
     }
   ],
   "action": {
