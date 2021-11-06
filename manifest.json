@@ -2,7 +2,7 @@
   "name": "GitHub comment minimizer",
   "short_name": "GHMinimizer",
   "description": "If several bots fight for attention in your GitHub pull requests, this will hide old bot comments visually in your timeline.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "options_page": "options.html",
   "permissions": [
     "storage"
