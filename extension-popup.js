@@ -80,9 +80,9 @@ const getAutoHideEnabledSetting = async function () {
     const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
     return autoHideSetting;
 };
-const displayAutoHideSetting = async function () {
+const displayAutoHideSetting = async function (settingCheckbox) {
     const currentAutoHideSetting = await getAutoHideEnabledSetting();
-    autoHideCommentsCheckbox.checked = currentAutoHideSetting;
+    settingCheckbox.checked = currentAutoHideSetting;
 };
 
 const getCurrentTab = async function () {
@@ -91,13 +91,13 @@ const getCurrentTab = async function () {
     return tab;
 };
 
-const shouldAutoHideComments = false;
 document.addEventListener('DOMContentLoaded', async function () {
     const prefixList = document.getElementById("namePrefixes");
     const autoHideCommentsCheckbox = document.getElementById("autoHideComments");
 
     await setMicrosoftDocsAndLearnDefaultPrefixes();
     await displaySavedNamePrefixes(prefixList);
+    await displayAutoHideSetting(autoHideCommentsCheckbox);
 
     // Send message that session auto-hide toggle has changed.
     autoHideCommentsCheckbox.addEventListener("change", async function (element) {
