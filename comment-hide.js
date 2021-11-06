@@ -1,8 +1,7 @@
 // @ts-check
 
-// TODO: It appears this entire file is executed from scratch for each button press within the extension pop-up. This can cause some excessive mutation observers and such. The end result isn't too painful, but definitely isn't ideal. This is likely because the file is executed as a content script initially/automatically and then within events for extension-popup.js.
+// TODO: Rename this file to reflect combination of comment hide/restore.
 (async function () {
-    // HACK: This was scoped within this immediately executing function to avoid the above TODO issue where the page is loaded multiple times, causing a runtime error with defining `options` repeatedly.
     // HACK: Duplicated directly from options.js until we can figure out a better code reuse strategy (modules?).
     const options = (function () {
         const storageSyncGetAsync = function (keysAndDefaults) {
@@ -60,7 +59,7 @@
         };
     }
 
-    const hideOutdatedBotCommentsTemporarily = function () {
+    const hideEligibleCommentsForSession = function () {
         const isElementHidden = (element) => {
             return element.offsetWidth === 0 && element.offsetHeight === 0;
         };
@@ -135,20 +134,42 @@
                 });
             }
         }
+    };
+    const restoreAllHiddenComments = function () {
+        console.log("Restoring any temporarily hidden comments...");
+        [...document.getElementsByClassName(extensionClassForTemporaryHideRestoration)] // find all the comment areas hidden previously
+            .forEach((hiddenComment) => {
+                let hiddenCommentPriorDisplayStateClass = [...hiddenComment.classList].find(className => className.startsWith(extensionClassPrefixForTemproraryHideRestorationState));
+                if (hiddenCommentPriorDisplayStateClass === null || hiddenCommentPriorDisplayStateClass === "") {
+                    // Found it with class but didn't find prior state...skip this one and remove class.
+                    hiddenComment.classList.remove(extensionClassForTemporaryHideRestoration);
+                    return;
+                }
 
-        // IN PROGRESS: Fix currently minimizing _all_ rather than all but newest ("outdated").
-        [...document.querySelectorAll(".js-timeline-item")] // find all the timeline items
-            .forEach((timelineItem) => hideTimelineItem(timelineItem));
+                let priorDisplayStyle = hiddenCommentPriorDisplayStateClass.substring(extensionClassPrefixForTemproraryHideRestorationState.length);
+                // Re-show via CSS.
+                hiddenComment.style.display = priorDisplayStyle;
+                // Remove hidden comment classes going forward.
+                hiddenComment.classList.remove(extensionClassForTemporaryHideRestoration);
+                hiddenComment.classList.remove(hiddenCommentPriorDisplayStateClass);
+            });
     };
 
+    let hideCommentsCallPending = false;
     // Wrap later-called function around hiding to handle hiding elements and also resetting the debounce flag.
     const handleHideComments = function () {
-        hideOutdatedBotCommentsTemporarily();
+        hideEligibleCommentsForSession();
         hideCommentsCallPending = false;
     };
+    let showCommentsCallPending = false;
+    // Wrap later-called function around hiding to handle hiding elements and also resetting the debounce flag.
+    const handleRestoreComments = function () {
+        restoreAllHiddenComments();
+        showCommentsCallPending = false;
+    };
 
-    // Handle first run through (and after re-triggering from extension pop-up, which is also currently a first-run [see hack comment at top]).
-    let hideCommentsCallPending = false;
+    // Handle first run through.
+    // NOTE: Shouldn't ever need to call `handleRestoreComments` on first load.
     if (shouldHideComments() === true) {
         hideCommentsCallPending = true;
         setTimeout(handleHideComments, 500);
@@ -165,28 +186,24 @@
             setTimeout(handleHideComments, 500);
         }
     });
-    // HACK: This observer is established early enough in the page lifecycle to be run as the first-run as well as future page mutations.
     // HACK: Also, probably need to `observer.disconnect()` at some point too.
-    // WARNING: Did get an error once that the first argument, the discussion element, wasn't a Node. That may mean that the discussion wasn't loaded yet, which would be unusual for a script loaded after `DOMContentLoaded` (in extension-popup.js).
     const pullRequestDiscussionNode = document.getElementById("discussion_bucket");
     if (pullRequestDiscussionNode !== null) {
         newCommentsShownObserver.observe(pullRequestDiscussionNode, {childList: true, subtree: true});
     }
     else {
+        // TODO: This error happens during interstitial team authorization display when the URL matches the desired pattern but it shows the auth request rather than the actual PR content.
         console.log("Could not find PR discussion log to observe for new comments.")
     }
 
     const handleCommentVisibility = function () {
         const autoHideSetting = shouldHideComments();
+        // Toggle show/hide of bot comments based on message data.
         if (autoHideSetting === true) {
-            // Toggle show/hide of bot comments based on message data.
             handleHideComments();
         }
         else {
-            // TODO: Migrate **comment-hide-restore.js** into this file.
-            // TODO: Rename this file to reflect combination of comment hide/restore.
-            // TODO: When `autoHideSetting` is false, re-show comments.
-            //handleShowComments();
+            handleRestoreComments();
         }
     };
 
