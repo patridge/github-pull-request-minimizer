@@ -5,7 +5,6 @@
   "version": "0.4.1",
   "options_page": "options.html",
   "permissions": [
-    "activeTab",
     "storage"
   ],
   "content_scripts": [
