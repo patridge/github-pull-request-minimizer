@@ -6,7 +6,6 @@
   "options_page": "options.html",
   "permissions": [
     "activeTab",
-    "scripting",
     "storage"
   ],
   "content_scripts": [
