@@ -75,11 +75,6 @@ const setAutoHideEnabledSetting = async function (autoHideEnabled) {
 const displayAutoHideSetting = async function () {
     const currentAutoHideSetting = await getAutoHideEnabledSetting();
     autoHideCommentsCheckbox.checked = currentAutoHideSetting;
-    // if (currentAutoHideSetting) {
-    // }
-    // else {
-    //     autoHideCommentsCheckbox.removeAttribute("checked");
-    // }
 };
 const saveAutoHideSetting = async function (event) {
     const newAutoHideSetting = event.target.checked;
@@ -221,5 +216,5 @@ const displaySavedNamePrefixes = async function () {
 addNewPrefixButton.addEventListener("click", addNewPrefixButtonClick);
 document.addEventListener('DOMContentLoaded', displaySavedNamePrefixes);
 document.addEventListener('DOMContentLoaded', setMicrosoftDocsAndLearnDefaultPrefixes);
-autoHideCommentsCheckbox.addEventListener("click", saveAutoHideSetting)
+autoHideCommentsCheckbox.addEventListener("change", saveAutoHideSetting)
 document.addEventListener('DOMContentLoaded', displayAutoHideSetting);

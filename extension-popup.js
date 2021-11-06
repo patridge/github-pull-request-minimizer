@@ -1,18 +1,13 @@
-let hideOutdatedCommentsTemporaryButton = document.getElementById('hideOutdatedCommentsTemporary');
-let hideOutdatedCommentsPermanentButton = document.getElementById('hideOutdatedCommentsPermanent');
-let prefixList = document.getElementById("namePrefixes");
-let reshowCommentsButton = document.getElementById("reshowCommentsButton");
-
-let storageSyncGetAsync = function (keysAndDefaults) {
-    let gotValue = new Promise((resolve, reject) => {
+const storageSyncGetAsync = function (keysAndDefaults) {
+    const gotValue = new Promise((resolve, reject) => {
         chrome.storage.sync.get(
             keysAndDefaults, // NOTE: `null` will get entire contents of storage
             function (result) {
                 // Keys could be a string or an array of strings (or any object to get back an empty result, or null to get all of cache).
                 // Unify to an array regardless.
-                let keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
+                const keyList = Array.isArray(keysAndDefaults) ? [...keysAndDefaults] : [keysAndDefaults];
                 for (var keyIndex in keyList) {
-                    var key = keyList[keyIndex];
+                    const key = keyList[keyIndex];
                     if (result[key]) {
                         console.log({status: `Cache found: [${key}]`, keys: keysAndDefaults, result });
                     }
@@ -26,8 +21,8 @@ let storageSyncGetAsync = function (keysAndDefaults) {
     });
     return gotValue;
 };
-let storageSyncSetAsync = function (items) {
-    let setValue = new Promise((resolve, reject) => {
+const storageSyncSetAsync = function (items) {
+    const setValue = new Promise((resolve, reject) => {
         chrome.storage.sync.set(
             items,
             function () {
@@ -44,11 +39,11 @@ let storageSyncSetAsync = function (items) {
     return setValue;
 };
 
-let getHasSetCustomPrefixes = async function () {
+const getHasSetCustomPrefixes = async function () {
     return (await storageSyncGetAsync({ hasSetPrefixes: false })).hasSetPrefixes;
 }
-let getPrefixes = async function () {
-    let currentSavedPrefixes = await storageSyncGetAsync(
+const getPrefixes = async function () {
+    const currentSavedPrefixes = await storageSyncGetAsync(
         {
             namePrefixes: []
         }
@@ -56,85 +51,86 @@ let getPrefixes = async function () {
     console.log(currentSavedPrefixes);
     return currentSavedPrefixes.namePrefixes;
 };
-
-let setMicrosoftDocsAndLearnDefaultPrefixes = async function () {
-    let hasSetCustomPrefixes = await getHasSetCustomPrefixes();
+const setMicrosoftDocsAndLearnDefaultPrefixes = async function (listNode) {
+    const hasSetCustomPrefixes = await getHasSetCustomPrefixes();
     if (!hasSetCustomPrefixes) {
-        let currentPrefixes = await getPrefixes();
+        const currentPrefixes = await getPrefixes();
         if (currentPrefixes.length !== 0) {
             return;
         }
 
-        statusLabel.textContent = "Setting up defaults prefix...";
+        console.log({status: `Setting up defaults prefix...`});
 
         // Set up MicrosoftDocs defaults
-        let microsoftDocsDefaultPrefixes = [
+        const microsoftDocsDefaultPrefixes = [
             "opbld",
             "PRMerger",
             "acrolinxatmsft"
         ];
         await storageSyncSetAsync({ namePrefixes: microsoftDocsDefaultPrefixes });
-
-        statusLabel.textContent = "Defaults set. Updating list...";
-        await displaySavedNamePrefixes();
-        statusLabel.textContent = "List refreshed.";
-
-        await delay(1500);
-        statusLabel.textContent = "";
+        await displaySavedNamePrefixes(listNode);
     }
 };
-
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
-let displaySavedNamePrefixes = async function () {
+const displaySavedNamePrefixes = async function (listNode) {
     // Clear list display
-    [...prefixList.childNodes].forEach(child => prefixList.removeChild(child));
+    [...listNode.childNodes].forEach(child => listNode.removeChild(child));
     // Get latest list and create items from them
-    let savedNamePrefixes = (await getPrefixes())
+    const savedNamePrefixes = (await getPrefixes())
         .map(prefix => {
-            let li = document.createElement("li");
-            let prefixSpan = document.createElement("span");
+            const li = document.createElement("li");
+            const prefixSpan = document.createElement("span");
             prefixSpan.appendChild(document.createTextNode(`${prefix}`));
             li.appendChild(prefixSpan);
             return li;
         });
     // Display new list of items
-    savedNamePrefixes.forEach(li => prefixList.appendChild(li));
+    savedNamePrefixes.forEach(li => listNode.appendChild(li));
 }
 
-document.addEventListener('DOMContentLoaded', async function () {
-    await setMicrosoftDocsAndLearnDefaultPrefixes();
-    await displaySavedNamePrefixes();
+const getAutoHideEnabledSetting = async function () {
+    const autoHideSetting = (await storageSyncGetAsync({ isAutoHideEnabled: true })).isAutoHideEnabled;
+    return autoHideSetting;
+};
+const displayAutoHideSetting = async function (settingCheckbox) {
+    const currentAutoHideSetting = await getAutoHideEnabledSetting();
+    settingCheckbox.checked = currentAutoHideSetting;
+};
 
-    hideOutdatedCommentsTemporaryButton.addEventListener("click", function (element) {
-        chrome.tabs.query(
+const getCurrentTab = async function () {
+    const queryOptions = { active: true, currentWindow: true };
+    const [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+};
+
+document.addEventListener('DOMContentLoaded', async function () {
+    const prefixList = document.getElementById("namePrefixes");
+    const autoHideCommentsCheckbox = document.getElementById("autoHideComments");
+
+    await setMicrosoftDocsAndLearnDefaultPrefixes(prefixList);
+    await displaySavedNamePrefixes(prefixList);
+    await displayAutoHideSetting(autoHideCommentsCheckbox);
+
+    // Send message that session auto-hide toggle has changed.
+    autoHideCommentsCheckbox.addEventListener("change", async function (element) {
+        const tab = await getCurrentTab();
+        chrome.tabs.sendMessage(
+            tab.id,
             {
-                active: true,
-                currentWindow: true
+                method: "autoHideSessionSetting",
+                data: {
+                    autoHideSession: autoHideCommentsCheckbox.checked
+                }
             },
-            function (tabs) {
-                chrome.tabs.executeScript(
-                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
-                    {
-                        file: "comment-hide.js"
-                    }
-                );
-            }
-        );
-    });
-    reshowCommentsButton.addEventListener("click", function (element) {
-        chrome.tabs.query(
-            {
-                active: true,
-                currentWindow: true
-            },
-            function (tabs) {
-                chrome.tabs.executeScript(
-                    null, /* current tab (similar but likely more reliable than `tabs[0].id`) */
-                    {
-                        file: "comment-hide-restore.js"
-                    }
-                );
+            function (response) {
+                if (!response || !response.result) {
+                    console.log("DEBUG: 'autoHideSessionSetting' sent message result was invalid", response);
+                }
+                else if (response.result === "error") {
+                    console.error("'autoHideSessionSetting' failed", response);
+                }
+                else {
+                    console.log("Auto hide session setting change handled", response);
+                }
             }
         );
     });
