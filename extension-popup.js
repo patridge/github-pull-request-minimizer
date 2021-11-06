@@ -68,13 +68,7 @@ const setMicrosoftDocsAndLearnDefaultPrefixes = async function (listNode) {
             "acrolinxatmsft"
         ];
         await storageSyncSetAsync({ namePrefixes: microsoftDocsDefaultPrefixes });
-
-        console.log({status: `Defaults set. Updating list...`});
         await displaySavedNamePrefixes(listNode);
-        console.log({status: `List refreshed.`});
-
-        await delay(1500);
-        statusLabel.textContent = "";
     }
 };
 const displaySavedNamePrefixes = async function (listNode) {
